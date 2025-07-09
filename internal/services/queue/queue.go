@@ -3,10 +3,10 @@ package queue
 import (
 	"context"
 	"errors"
-	"waitingroom/internal/domain/model"
 	"waitingroom/internal/infra/repositories/load"
 	"waitingroom/internal/infra/repositories/queue"
 	"waitingroom/internal/infra/repositories/session"
+	"waitingroom/internal/model"
 )
 
 type Service interface {

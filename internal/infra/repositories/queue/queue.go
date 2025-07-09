@@ -5,8 +5,8 @@ import (
 	"errors"
 	"github.com/redis/go-redis/v9"
 	"time"
-	"waitingroom/internal/domain/model"
 	"waitingroom/internal/infra/container"
+	"waitingroom/internal/model"
 )
 
 const (

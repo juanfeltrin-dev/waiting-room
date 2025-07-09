@@ -3,8 +3,8 @@ package load
 import (
 	"context"
 	"github.com/redis/go-redis/v9"
-	"waitingroom/internal/domain/model"
 	"waitingroom/internal/infra/container"
+	"waitingroom/internal/model"
 )
 
 type Repository interface {

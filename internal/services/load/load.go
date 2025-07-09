@@ -2,8 +2,8 @@ package load
 
 import (
 	"context"
-	"waitingroom/internal/domain/model"
 	"waitingroom/internal/infra/repositories/load"
+	"waitingroom/internal/model"
 )
 
 type Service interface {
