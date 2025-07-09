@@ -82,7 +82,13 @@ func (r *CacheRepository) GetAverageQueueTime(ctx context.Context) int64 {
 
 	var soma int64
 	for _, durationInQueue := range durationsInQueue {
-		soma += durationInQueue.Values["duration"].(int64)
+		durationStr := durationInQueue.Values["duration"].(string)
+		durationConvert, err := strconv.ParseInt(durationStr, 10, 64)
+		if err != nil {
+			soma += 0
+			continue
+		}
+		soma += durationConvert
 	}
 
 	return soma / int64(len(durationsInQueue))

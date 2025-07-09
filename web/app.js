@@ -49,12 +49,44 @@ async function getPosition() {
         }
     });
     if (res.status === 401) {
-        refreshToken();
+        await refreshToken();
         return;
     }
 
     const data = await res.json();
     document.getElementById("position").innerText = data.position;
+}
+
+async function getAvg() {
+    const res = await fetch("http://localhost:8000/api/v1/queues/status", {
+        method: "GET",
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        }
+    });
+    if (res.status === 401) {
+        await refreshToken();
+        return;
+    }
+
+    const data = await res.json();
+    document.getElementById("avg").innerText = formatTime(data.average_queue_time);
+}
+
+function formatTime(seconds) {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secondsRemaining = seconds % 60;
+
+    let parts = [];
+    if (hours > 0) parts.push(`${hours} hora${hours > 1 ? 's' : ''}`);
+    if (minutes > 0) parts.push(`${minutes} minuto${minutes > 1 ? 's' : ''}`);
+    if (secondsRemaining > 0 || parts.length === 0) {
+        parts.push(`${secondsRemaining} segundo${secondsRemaining > 1 ? 's' : ''}`);
+    }
+
+    return parts.join(", ");
 }
 
 async function refreshToken() {
@@ -75,12 +107,13 @@ socket.on("connect", () => {
     }
 });
 
-socket.on("releaseEntry", (msg) => {
-    console.log(msg);
-    document.getElementById("status").innerText = "Sua vez chegou";
+socket.on("releaseEntry", () => {
+    localStorage.setItem("status", "active");
+    window.location.href = "https://google.com";
 });
 
 isEntered = enter();
 if (isEntered) {
     setInterval(getPosition, 2000);
+    setInterval(getAvg, 5000);
 }
