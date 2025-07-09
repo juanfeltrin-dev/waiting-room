@@ -1,0 +1,20 @@
+services:
+  redis:
+    image: redis:latest
+    container_name: waiting-room-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+  redisinsight:
+    image: redis/redisinsight:latest
+    container_name: waiting-room--redis-insight
+    ports:
+      - "5540:5540"
+    volumes:
+      - redisinsight_data:/db
+    depends_on:
+      - redis
+volumes:
+  redis_data:
+  redisinsight_data:
