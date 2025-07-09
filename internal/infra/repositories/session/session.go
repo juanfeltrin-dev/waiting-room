@@ -64,6 +64,8 @@ func (r *CacheRepository) Exit(ctx context.Context, sessionID string) {
 
 	r.cache.XAdd(ctx, &redis.XAddArgs{
 		Stream: keyAverageQueueTime,
+		MaxLen: 50,
+		Approx: true,
 		Values: map[string]interface{}{
 			"token":    sessionID,
 			"duration": duration,
