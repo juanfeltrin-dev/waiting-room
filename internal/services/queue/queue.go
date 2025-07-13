@@ -18,21 +18,21 @@ type Service interface {
 }
 
 type QueueService struct {
-	loadRepository    load.Repository
-	queueRepository   queue.Repository
-	sessionRepository session.Repository
+	LoadRepository    load.Repository
+	QueueRepository   queue.Repository
+	SessionRepository session.Repository
 }
 
 func NewService() Service {
 	return &QueueService{
-		loadRepository:    load.NewRepository(),
-		queueRepository:   queue.NewRepository(),
-		sessionRepository: session.NewRepository(),
+		LoadRepository:    load.NewRepository(),
+		QueueRepository:   queue.NewRepository(),
+		SessionRepository: session.NewRepository(),
 	}
 }
 
 func (s *QueueService) GetPosition(ctx context.Context, sessionID string) (model.Queue, error) {
-	queueModel := s.queueRepository.GetPosition(ctx, sessionID)
+	queueModel := s.QueueRepository.GetPosition(ctx, sessionID)
 	if queueModel.OutOfQueue() {
 		return model.Queue{}, errors.New("user is not in queue")
 	}
@@ -41,55 +41,55 @@ func (s *QueueService) GetPosition(ctx context.Context, sessionID string) (model
 }
 
 func (s *QueueService) Enter(ctx context.Context, sessionID string) bool {
-	isMemberInQueue := s.queueRepository.IsMember(ctx, sessionID)
+	isMemberInQueue := s.QueueRepository.IsMember(ctx, sessionID)
 	if isMemberInQueue {
 		return true
 	}
 
-	isMemberInLoad := s.loadRepository.IsMember(ctx, sessionID)
+	isMemberInLoad := s.LoadRepository.IsMember(ctx, sessionID)
 	if isMemberInLoad {
 		return false
 	}
 
-	loadModel := s.loadRepository.GetStatus(ctx)
+	loadModel := s.LoadRepository.GetStatus(ctx)
 	if loadModel.ReachedCapacity() {
-		err := s.sessionRepository.Init(ctx, sessionID)
+		err := s.SessionRepository.Init(ctx, sessionID)
 		if err != nil {
 			return false
 		}
 
-		s.queueRepository.Enter(ctx, sessionID)
+		s.QueueRepository.Enter(ctx, sessionID)
 
 		return true
 	}
 
-	s.loadRepository.Increment(ctx, sessionID)
+	s.LoadRepository.Increment(ctx, sessionID)
 
 	return false
 }
 
 func (s *QueueService) Exit(ctx context.Context, sessionID string) bool {
-	isMember := s.loadRepository.IsMember(ctx, sessionID)
+	isMember := s.LoadRepository.IsMember(ctx, sessionID)
 	if !isMember {
 		return false
 	}
 
-	s.loadRepository.Decrement(ctx, sessionID)
+	s.LoadRepository.Decrement(ctx, sessionID)
 
 	return true
 }
 
 func (s *QueueService) ReleaseEntry(ctx context.Context) string {
-	loadModel := s.loadRepository.GetStatus(ctx)
+	loadModel := s.LoadRepository.GetStatus(ctx)
 	if loadModel.ReachedCapacity() {
 		return ""
 	}
 
-	sessionID, _ := s.queueRepository.First(ctx)
+	sessionID, _ := s.QueueRepository.First(ctx)
 	if sessionID != "" {
-		s.loadRepository.Increment(ctx, sessionID)
-		s.queueRepository.Exit(ctx, sessionID)
-		s.sessionRepository.Exit(ctx, sessionID)
+		s.LoadRepository.Increment(ctx, sessionID)
+		s.QueueRepository.Exit(ctx, sessionID)
+		s.SessionRepository.Exit(ctx, sessionID)
 
 		return sessionID
 	}
@@ -98,5 +98,5 @@ func (s *QueueService) ReleaseEntry(ctx context.Context) string {
 }
 
 func (s *QueueService) GetAverageQueueTime(ctx context.Context) int64 {
-	return s.sessionRepository.GetAverageQueueTime(ctx)
+	return s.SessionRepository.GetAverageQueueTime(ctx)
 }
