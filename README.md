@@ -33,7 +33,7 @@ graph TD
     B -->|Não| D[Exibe tela de espera]
     D --> E[Entra na fila via API]
     E --> F{Posição na fila?}
-    F -->|>0| G[Mostra posição e espera]
+    F -->| >0| G[Mostra posição e espera]
     F -->|0| H[Redireciona para URL de destino]
     G --> I[Atualizações via WebSocket]
     I --> H
